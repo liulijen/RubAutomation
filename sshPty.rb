@@ -45,15 +45,14 @@ def showLSCkey
   writer.puts("dbg\r")
   reader.expect('>')
   writer.puts("switch SHELL\r")
-  reader.expect('~ #')
+  reader.expect('~ #'){
   writer.puts("ls /var/voice_conf/sec1/lsc0\r")
   writer.puts("ls /var/voice_conf/sec2/lsc0\r")
-  6.times{
-    answer = reader.gets
-    puts "#{answer}"
   }
-
- 
+  while  reader.eof? == true
+    answer=reader.gets
+    puts "#{answer}"
+  end	
 end
 case ARGV[1]
   when '1' then
@@ -61,6 +60,10 @@ case ARGV[1]
   when '2' then
     showSWversion
   when '3' then
+    showLSCkey
+  when '4' then
+    showServer
+    showSWversion
     showLSCkey
   else
     puts "No Input" 
