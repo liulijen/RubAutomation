@@ -25,12 +25,19 @@ require 'expect'
        puts "#{sysTime}\tRTP started"
     when /IPPS_MFMT_RTVSAVP_ID/
        puts "#{sysTime}\tSRTP started"
+    when /EVT_DNLD_FILE_TRYING/
+       puts "#{sysTime}\tObtain a file"
+    when /update common cfg/
+       puts "#{sysTime}\tUsing download file"
+    when /applySavedCfgFile/
+       puts "#{sysTime}\tUsing saved file"
     when /Destroying.../
        puts "#{sysTime} Software Reset"
     when /Press ESC for monitor/
        puts "#{sysTime} Hardware Reset"
-    when /Assertion/
-       puts "#{sysTime} Assertion Happened!!!!!!!!!!"
+    when /Assert/
+       puts "#{sysTime}\t\t\tAssertion Happened!!!!!!!!!!"
+    when /ready to close/
+       puts "#{sysTime}\t\t\tCrash!!!!!!!!!!"
     end
-   
   }
