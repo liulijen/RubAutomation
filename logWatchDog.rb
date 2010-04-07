@@ -1,7 +1,7 @@
 $expect_verbose = true
 def sysTime
    t=Time.new
-   return t.strftime("%H:%M:%S")
+   return t.strftime("#{ARGV[0]} %H:%M:%S")
 end
 @account = 'orthrus'
 @password = 'cisco123'
@@ -39,5 +39,9 @@ require 'expect'
        puts "#{sysTime}\t\t\tAssertion Happened!!!!!!!!!!"
     when /ready to close/
        puts "#{sysTime}\t\t\tCrash!!!!!!!!!!"
+    when /System restart caused by vlan/
+       puts "#{sysTime}\t\tSystem restart caused by vlan"
+    when /Ambiguous/
+       puts "#{sysTime} Ambiguous: might be UDP and TCP problem"
     end
   }
