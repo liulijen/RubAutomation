@@ -2,6 +2,10 @@ require 'nokogiri'
 require'net/http'  
 url="http://#{ARGV[0]}/Device_Information.htm"  
 url2="http://#{ARGV[0]}/Network_Setup.htm"  
+listed=Array.new
+listed.push("MAC Address","Phone 1 DN","Status1","Phone 2 DN","Status2","Call Manager 1","Call Manager 2","Call Manager 3","Call Manager 4","Call Manager 5","Security 1 Mode","Security 2 Mode","SW_Version ID"); #Specified Show Column
+
+
 url=URI.parse(url)   
 url2=URI.parse(url2)   
 Net::HTTP.start(url.host) do |http|   
@@ -11,11 +15,15 @@ Net::HTTP.start(url.host) do |http|
     #print resp.code,resp.body   
         i=0;
     Nokogiri::HTML(resp.body).xpath("//tr/td/p/b[not (span) and not (a)]/text()").each{|match|
-        print match
         if i==0
-           print "\t"           
-           i=1
+           if listed.include?(match.to_s)
+			  print match          
+              print "\t"           
+              i=1
+              listed.delete(match.to_s)
+           end
         else
+           print match
            print "\n"           
            i=0
         end
@@ -26,19 +34,23 @@ Net::HTTP.start(url.host) do |http|
     #print resp.code,resp.body   
         i=0;
     Nokogiri::HTML(resp.body).xpath("//tr/td/p/b[not (span) and not (a)]").each{|match|
-        print match.to_s.gsub("<b>","").gsub("</b>","")
+        match=match.to_s.gsub("<b>","").gsub("</b>","")
         if i==0
-           print "\t"           
-           i=1
+           if listed.include?(match)
+		      print match
+	 	      print "\t"           
+			  i=1
+           end
         else
+           print match
            print "\n"           
            i=0
         end
     }
 end  
-
 =begin
 Nokogiri::HTML(open("http://supervisor:12345@#{ARGV[0]}")).xpath("//body").each{|mat|
     puts mat
 }
 =end
+
