@@ -43,5 +43,7 @@ require 'expect'
        puts "#{sysTime}\t\tSystem restart caused by vlan"
     when /Ambiguous/
        puts "#{sysTime} Ambiguous: might be UDP and TCP problem"
+    when /private key is null/
+       puts "#{sysTime} private key is null."
     end
   }
