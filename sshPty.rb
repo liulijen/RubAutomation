@@ -37,6 +37,22 @@ def showSWversion
     puts "#{answer}"
   }
 end
+def showPs 
+  reader, writer, pid=PTY.spawn("ssh #{@account}@#{ARGV[0]}") 
+  reader.expect(/^.*password:/)
+  writer.puts("#{@password}\r")
+  reader.expect(/^Orthrus-sip\#/)
+  writer.puts("dbg\r")
+  reader.expect('>')
+  writer.puts("switch SHELL\r")
+  reader.expect('~ #')
+  writer.puts("ps\r")
+  
+  while  reader.eof? == false
+    answer=reader.gets
+    puts "#{answer}"
+  end
+end
 def showLSCkey 
   reader, writer, pid=PTY.spawn("ssh #{@account}@#{ARGV[0]}") 
   reader.expect(/^.*password:/)
@@ -49,7 +65,7 @@ def showLSCkey
   writer.puts("ls /var/voice_conf/sec1/lsc0\r")
   writer.puts("ls /var/voice_conf/sec2/lsc0\r")
   }
-  while  reader.eof? == true
+  while  reader.eof? == false
     answer=reader.gets
     puts "#{answer}"
   end	
@@ -62,6 +78,8 @@ case ARGV[1]
   when '3' then
     showLSCkey
   when '4' then
+    showPs
+  when '5' then
     showServer
     showSWversion
     showLSCkey
