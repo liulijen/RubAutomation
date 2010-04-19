@@ -18,7 +18,7 @@ Net::HTTP.start(url.host) do |http|
         match=match.to_s.gsub("\n","")
         if i==0
            if listed.include?(match)
-			  print match          
+			  print "\33[1;32;40m#{match}\33[0m"          
               print "\t"           
               i=1
               listed.delete(match)
@@ -38,7 +38,7 @@ Net::HTTP.start(url.host) do |http|
         match=match.to_s.gsub("<b>","").gsub("</b>","")
         if i==0
            if listed.include?(match)
-		      print match
+			  print "\33[1;32;40m#{match}\33[0m"          
 	 	      print "\t"           
 			  i=1
            end
