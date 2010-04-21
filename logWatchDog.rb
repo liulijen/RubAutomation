@@ -3,8 +3,11 @@ def sysTime
    t=Time.new
    return t.strftime("#{ARGV[0]} %H:%M:%S")
 end
+fName=Time.new.strftime("#{ARGV[0].split('.')[3]}.%Y%m%d_%H-%M-%S")
 @account = 'orthrus'
 @password = 'cisco123'
+@logTmpFile="logs/#{fName}.log"
+
 require 'pty'
 require 'expect'
   reader, writer, pid=PTY.spawn("ssh #{@account}@#{ARGV[0]}") 
@@ -18,8 +21,10 @@ require 'expect'
        Process.exit
     end
   end
+  @log=File.open(@logTmpFile,'w')
   loop{ 
     answer = reader.gets
+    @log.write(answer)
 	case answer
     when /IPPS_MFMT_RTVAVP_ID/
        puts "#{sysTime}\tRTP started"
