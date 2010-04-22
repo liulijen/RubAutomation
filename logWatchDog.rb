@@ -1,8 +1,21 @@
 $expect_verbose = true
+def cFileName(ori)
+   return "\33[1;34;40m#{ori}\33[0m"
+end
+def cCriticalEvent(ori)
+   return "\33[5;47;41m#{ori}\33[0m"
+end
+def cEvent(ori)
+   return "\33[1;36;40m#{ori}\33[0m"
+end
+def cTrivial(ori)
+   return "\33[2;47;40m#{ori}\33[0m"
+end
 def sysTime
    t=Time.new
-   return t.strftime("#{ARGV[0]} %H:%M:%S")
+   return cTrivial(t.strftime("#{ARGV[0]} %H:%M:%S"))
 end
+
 fName=Time.new.strftime("#{ARGV[0].split('.')[3]}.%Y%m%d_%H-%M-%S")
 @account = 'orthrus'
 @password = 'cisco123'
@@ -27,28 +40,36 @@ require 'expect'
     @log.write(answer)
 	case answer
     when /IPPS_MFMT_RTVAVP_ID/
-       puts "#{sysTime}\tRTP started"
+       puts "#{sysTime}\t\t#{cTrivial("RTP started")}"
+    when /Line._reg_status = 1/
+       puts "#{sysTime}\t#{cEvent("Registered")}"
+    when /TIU_ONHOOK.*-/
+       puts "#{sysTime}\t\t#{cTrivial("On,L"+answer.split('port_id=')[1][0])}"
+    when /TIU_OFFHOOK.*-/
+       puts "#{sysTime}\t\t#{cTrivial("Off,L"+answer.split('port_id=')[1][0])}"
     when /IPPS_MFMT_RTVSAVP_ID/
        puts "#{sysTime}\tSRTP started"
-    when /EVT_DNLD_FILE_TRYING/
-       puts "#{sysTime}\tObtain a file"
-    when /update common cfg/
-       puts "#{sysTime}\tUsing download file"
+    when /tftp.*69/
+       puts "#{sysTime}\t\tGetting..#{cFileName(answer.split(' ')[9])}"
+    when /EVT_DNLD_FILE_READY/
+       puts "#{sysTime}\t\t#{cTrivial("Obtain file.")}"
+    when /saveFileToFlash/
+       puts "#{sysTime}\t\t#{cTrivial("File auth pass and save it to flash")}"
     when /applySavedCfgFile/
-       puts "#{sysTime}\tUsing saved file"
-    when /Destroying.../
-       puts "#{sysTime} Software Reset"
+       puts "#{sysTime}\t\t#{cCriticalEvent("Loading saved file")}"
+    when /REPROVISION/
+       puts "#{sysTime}\t#{cEvent("Reprovision...")}"
     when /Press ESC for monitor/
        puts "#{sysTime} Hardware Reset"
     when /Assert/
-       puts "#{sysTime}\t\t\tAssertion Happened!!!!!!!!!!"
+       puts "#{sysTime}\t\t\t#{cCriticalEvent("Assertion Happened!!!!!!!!!!")}"
     when /ready to close/
-       puts "#{sysTime}\t\t\tCrash!!!!!!!!!!"
+       puts "#{sysTime}\t\t\t#{cCriticalEvent("Crash!!!")}"
     when /System restart caused by vlan/
-       puts "#{sysTime}\t\tSystem restart caused by vlan"
+       puts "#{sysTime}\t\t#{cCriticalEvent("System restart caused by vlan")}"
     when /Ambiguous/
        puts "#{sysTime} Ambiguous: might be UDP and TCP problem"
     when /private key is null/
-       puts "#{sysTime} private key is null."
+       puts "#{sysTime} #{cCriticalEvent("private key is null.")}"
     end
   }
