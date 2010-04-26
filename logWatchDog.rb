@@ -23,9 +23,17 @@ fName=Time.new.strftime("#{ARGV[0].split('.')[3]}.%Y%m%d_%H-%M-%S")
 
 require 'pty'
 require 'expect'
+  puts "Starting.."
   reader, writer, pid=PTY.spawn("ssh #{@account}@#{ARGV[0]}") 
-  reader.expect(/password:/) 
-  writer.puts("#{@password}\r")
+  reader.expect(/(password|yes)/) do |whole, match| #'yes' mains it's unknown host, need to download key
+    if(match=="password")
+       writer.puts("#{@password}\r")
+    else
+       writer.puts("yes\r")
+       reader.expect(/password/)
+       writer.puts("#{@password}\r")
+    end
+  end
   reader.expect(/(Orthrus-sip|denied)/) do |a,b|
 	if b == "Orthrus-sip"
 	   puts "Now watching..."
@@ -44,9 +52,9 @@ require 'expect'
     when /Line._reg_status = 1/
        puts "#{sysTime}\t#{cEvent("Registered")}"
     when /TIU_ONHOOK.*-/
-       puts "#{sysTime}\t\t#{cTrivial("On,L"+answer.split('port_id=')[1][0])}"
+       puts "#{sysTime}\t\t#{cTrivial("On,L"+answer.split('port_id=')[1][0].chr)}"
     when /TIU_OFFHOOK.*-/
-       puts "#{sysTime}\t\t#{cTrivial("Off,L"+answer.split('port_id=')[1][0])}"
+       puts "#{sysTime}\t\t#{cTrivial("Off,L"+answer.split('port_id=')[1][0].chr)}"
     when /IPPS_MFMT_RTVSAVP_ID/
        puts "#{sysTime}\tSRTP started"
     when /tftp.*69/
