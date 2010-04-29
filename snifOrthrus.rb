@@ -1,8 +1,18 @@
 $expect_verbose = true
-$cmd=open('sharkOrthrus.sh','r')
+if ARGV[0].length!=17
+	puts "Usage: snifOrthrus [MAC Address]\n\n"
+    Process.exit
+end
+$fCmd=open('sharkOrthrus.sh','r')
+cmd=""
+while $fCmd.gets
+	cmd+=$_
+end
+$fCmd.close
+cmd=cmd.gsub('EC:44:76:1F:7E:62',ARGV[0])
 #$f=IO.popen 'tshark -i en0 -f "ether host EC:44:76:1F:7E:62 and not udp" -V'
 require 'pty'
-$f,$w,pid=PTY.spawn($cmd.gets)
+$f,$w,pid=PTY.spawn(cmd)
 #$f=IO.popen $cmd.gets 
 def cFileName(ori)
    return "\33[1;34;40m#{ori}\33[0m"
@@ -18,7 +28,7 @@ def cTrivial(ori)
 end
 def sysTime
    t=Time.new
-   return cTrivial(t.strftime("#{ARGV[0]} %H:%M:%S"))
+   return cTrivial(t.strftime("(#{ARGV[0][-5..-1]})%H:%M:%S"))
 end
 trap("INT") { 
 	puts "#{cTrivial("User stop analyzing!")}"
