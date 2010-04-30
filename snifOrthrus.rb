@@ -29,10 +29,26 @@ end
 def cRed(ori)
    return "\33[1;31;40m#{ori}\33[0m"
 end
-def sysTime
+def sysTimeWrap (content)
    t=Time.new
-   return cTrivial(t.strftime("(#{ARGV[0][-5..-1]})%H:%M:%S"))
+   return cTrivial(t.strftime("(#{ARGV[0][-5..-1]})%H:%M:%S"))+"\t"+content.to_s
 end
+#Time Period Meter
+$last={}
+def tLastArrival(key)
+    if !$last.has_key?(key)
+		$last[key]=Time.new.to_f
+	end
+	tmp=$last[key]
+    $last[key]=Time.new.to_f 
+    dis=($last[key]-tmp+0.5).floor
+	return dis==0?-1:dis
+end
+def lastArrWrap(content,key)
+	tmp=tLastArrival(key)
+	return content+cTrivial((tmp == -1?"":" last:#{tmp}s"))
+end
+#Time Period Meter End
 def putLine(text)
 	print "\n"+text
 end
@@ -46,6 +62,16 @@ trap("INT") {
   printLine("Capturing..")
   cRTP=0; #RTP show interval
   tCDP=0; #CDP timer
+
+$cShrink=0
+def packetShrink(mNotify) #convert 'cShrink' the same packet to 1
+   	if $cShrink>500
+   	  putLine(sysTimeWrap(cTrivial(mNotify)))
+      $cShrink=0
+    else
+      $cShrink+=1
+    end
+end
   loop{
     #$f.sync 
     answer = $f.gets
@@ -53,51 +79,48 @@ trap("INT") {
     #puts answer
 	case answer
     when /NOTIFY sip.* \(text\/plain\)/
-       putLine("#{sysTime} CUCM send #{cEvent("Reset or Restart")}")
+       putLine(sysTimeWrap("CUCM send #{cEvent("Reset or Restart")}"))
     when /CDP Device ID: (\S+)/
-       putLine("#{sysTime}\t #{cTrivial("CDP: device ID is #{$1}")}")
-    when /ARP Who has (\S+)?/
-       putLine("#{sysTime}\t #{cTrivial("ARP: who? #{$1}")}")
-    when /ARP (\S+) is at (\S+)/
-       printLine(cTrivial(".. is ")+$2)
+       putLine(sysTimeWrap(lastArrWrap("#{cTrivial("CDP: device ID is #{$1}")}","cdp")))
+   # when /ARP Who has (\S+)?/
+   #    putLine("#{sysTime}\t #{cTrivial("ARP: who? #{$1}")}")
+   # when /ARP (\S+) is at (\S+)/
+   #    printLine(cTrivial(".. is ")+$2)
     when /Request: INVITE sip/
-       putLine("#{sysTime}\t INVITE a call")
+       putLine(sysTimeWrap("INVITE a call"))
     when /Request: BYE sip/
-       putLine("#{sysTime}\t BYE a call")
+       putLine(sysTimeWrap("BYE a call"))
     when /DHCP Request/
-       putLine("#{sysTime}\t #{cTrivial("DHCP Request")}")
+       putLine(sysTimeWrap(lastArrWrap(cTrivial("DHCP Request"),"dhcp")))
     when /DHCP ACK/
-       putLine("#{sysTime}\t #{cTrivial("DHCP ACK")}")
+       printLine(cTrivial("..obtained ACK"))
     when /Gratuitous ARP for (.*) /
        #puts "#{sysTime}\t #{cEvent("GARP")} for #{$1}"
-       putLine("#{sysTime}\t #{cTrivial("GARP for #{$1}")}")
+       putLine(sysTimeWrap(lastArrWrap(cTrivial("GARP for #{$1}"),"garp")))
     when /-> (\S+) DNS Standard query A (\S+)/
-       putLine("#{sysTime}\t #{cEvent("DNS")}  query for #{$2} from "+$1+"")
+       putLine(sysTimeWrap(lastArrWrap("#{cEvent("DNS")}  query for #{$2} from "+$1,"dns")))
     when /DNS Standard query response A (\S+)/
        printLine(cEvent(".. response "+$1))
     when /-> (\S+) TFTP Read Request, File: (\S+)\\/
-       putLine("#{sysTime}\t #{cEvent("TFTP")} request #{cFileName("#{$2}")} from "+$1)
+       putLine(sysTimeWrap("#{cEvent("TFTP")} request #{cFileName("#{$2}")} from "+$1))
     when /PT=ITU-T G.711/
-       if cRTP>500
-       	  putLine("#{sysTime}\t #{cTrivial("G.711 RTP...sending")}")
-          cRTP=0
-       else
-          cRTP+=1
-	   end
+		packetShrink("G.711 RTP...seding")
     when /PT=ITU-T G.729/
-       if cRTP>500
-       	  putLine("#{sysTime}\t #{cTrivial("G.729 RTP...sending")}")
-          cRTP=0
-       else
-          cRTP+=1
-	   end
+		packetShrink("G.729 RTP...sending")
     when /TFTP Data Packet.*\(last\)/
        printLine(cEvent(".. obtained"))
     when /TFTP Error Code.*Could not open/
        printLine(cRed(".. failed!"))
     when /HTTP GET \/(\S+)/
-	   putLine("#{sysTime}\t HTTP #{cTrivial("sent #{$1}")}")
+	   putLine(sysTimeWrap("HTTP #{cTrivial("sent #{$1}")}"))
+    when /SIP Status: 401 Unauthorized/
+	   putLine(sysTimeWrap("SIP #{cTrivial("Unauthorized")}"))
+    when /T.38 UDP:UDPTLPacket/
+		packetShrink("T.38 fax...sending")
+    when /TLSv1/
+		packetShrink("TLS..")
     end
+
   }
 
 
