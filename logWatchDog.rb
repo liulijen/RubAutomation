@@ -67,6 +67,8 @@ require 'expect'
        puts "#{sysTime}\t\t#{cCriticalEvent("Loading saved file")}"
     when /REPROVISION/
        puts "#{sysTime}\t#{cEvent("Reprovision...")}"
+    when /conifg auth (\S+) failed/
+       puts "#{sysTime} #{$1} auth failed"
     when /Press ESC for monitor/
        puts "#{sysTime} Hardware Reset"
     when /Assert/

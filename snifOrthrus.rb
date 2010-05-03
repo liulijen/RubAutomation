@@ -64,8 +64,8 @@ trap("INT") {
   tCDP=0; #CDP timer
 
 $cShrink=0
-def packetShrink(mNotify) #convert 'cShrink' the same packet to 1
-   	if $cShrink>500
+def packetShrink(mNotify,setShrink=500) #convert 'cShrink' the same packet to 1
+   	if $cShrink>setShrink
    	  putLine(sysTimeWrap(cTrivial(mNotify)))
       $cShrink=0
     else
@@ -88,8 +88,14 @@ end
    #    printLine(cTrivial(".. is ")+$2)
     when /Request: INVITE sip/
        putLine(sysTimeWrap("INVITE a call"))
+    when /(\S+) SIP Request: REGISTER.*sip.Expires == (\S+)/
+       putLine(sysTimeWrap(lastArrWrap("#{cTrivial("SIP REGISTER #{$1}")}","sip")))
+    when /SIP Status: (\d+) (\S+)/
+       printLine(cTrivial(".."+$1+" "+$2))
     when /Request: BYE sip/
        putLine(sysTimeWrap("BYE a call"))
+    #when /(\S+) -> \S+ SIP Status: 200 OK/
+    #   putLine(sysTimeWrap(lastArrWrap("SIP: registered (#{$1})","sip")))
     when /DHCP Request/
        putLine(sysTimeWrap(lastArrWrap(cTrivial("DHCP Request"),"dhcp")))
     when /DHCP ACK/
@@ -114,11 +120,13 @@ end
     when /HTTP GET \/(\S+)/
 	   putLine(sysTimeWrap("HTTP #{cTrivial("sent #{$1}")}"))
     when /SIP Status: 401 Unauthorized/
-	   putLine(sysTimeWrap("SIP #{cTrivial("Unauthorized")}"))
+	   putLine(sysTimeWrap(lastArrWrap("SIP #{cTrivial("Unauthorized")}","Unauth")))
+    when /(\S+) -> \S+ RTP PT=Comfort noise/
+	   packetShrink("Comfort noise (#{$1})",20)
     when /T.38 UDP:UDPTLPacket/
 		packetShrink("T.38 fax...sending")
     when /TLSv1/
-		packetShrink("TLS..")
+		packetShrink("TLS..",20)
     end
 
   }
