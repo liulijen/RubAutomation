@@ -86,12 +86,12 @@ end
    #    putLine("#{sysTime}\t #{cTrivial("ARP: who? #{$1}")}")
    # when /ARP (\S+) is at (\S+)/
    #    printLine(cTrivial(".. is ")+$2)
-    when /Request: INVITE sip/
-       putLine(sysTimeWrap("INVITE a call"))
-    when /(\S+) SIP Request: REGISTER.*sip.Expires == (\S+)/
-       putLine(sysTimeWrap(lastArrWrap("#{cTrivial("SIP REGISTER #{$1}")}","sip")))
-    when /SIP Status: (\d+) (\S+)/
-       printLine(cTrivial(".."+$1+" "+$2))
+    when /Request: INVITE sip:(\S+):/
+       putLine(sysTimeWrap("INVITE #{$1}"))
+    #when /(\S+) SIP Request: REGISTER.*sip.Expires == (\S+)/
+    #   putLine(sysTimeWrap(lastArrWrap("#{cTrivial("SIP REGISTER #{$1}")}","sip")))
+    #when /SIP Status: (\d+) (\S+)/
+    #   printLine(cTrivial(".."+$1+" "+$2))
     when /Request: BYE sip/
        putLine(sysTimeWrap("BYE a call"))
     #when /(\S+) -> \S+ SIP Status: 200 OK/
