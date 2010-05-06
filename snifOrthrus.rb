@@ -70,10 +70,7 @@ def packetShrink(mNotify,setShrink=500) #convert 'cShrink' the same packet to 1
     end
 end
   loop{
-    #$f.sync 
     answer = $f.gets
-    #$f.flush
-    #puts answer
 	case answer
     when /NOTIFY sip.* \(text\/plain\)/
        putLine(sysTimeWrap("CUCM send #{cEvent("Reset or Restart")}"))
