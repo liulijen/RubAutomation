@@ -1,3 +1,5 @@
+require 'ConsUtil.rb'
+include Cc
 if ARGV[0].length!=17
 	puts "Usage: snifOrthrus [MAC Address]\n\n"
     Process.exit
@@ -11,24 +13,9 @@ $fCmd.close
 cmd=cmd.gsub('EC:44:76:1F:7E:62',ARGV[0])
 require 'pty'
 $f,$w,pid=PTY.spawn(cmd)
-def cFileName(ori)
-   return "\33[1;34;40m#{ori}\33[0m"
-end
-def cCriticalEvent(ori)
-   return "\33[5;47;41m#{ori}\33[0m"
-end
-def cEvent(ori)
-   return "\33[1;36;40m#{ori}\33[0m"
-end
-def cTrivial(ori)
-   return "\33[2;47;40m#{ori}\33[0m"
-end
-def cRed(ori)
-   return "\33[1;31;40m#{ori}\33[0m"
-end
 def sysTimeWrap (content)
    t=Time.new
-   return cTrivial(t.strftime("(#{ARGV[0][-5..-1]})%H:%M:%S"))+"\t"+content.to_s
+   return Cc.cTrivial(t.strftime("(#{ARGV[0][-5..-1]})%H:%M:%S"))+"\t"+content.to_s
 end
 #Time Period Meter
 $last={}
@@ -43,7 +30,7 @@ def tLastArrival(key)
 end
 def lastArrWrap(content,key)
 	tmp=tLastArrival(key)
-	return content+cTrivial((tmp == -1?"":" last:#{tmp}s"))
+	return content+Cc.cTrivial((tmp == -1?"":" last:#{tmp}s"))
 end
 #Time Period Meter End
 def putLine(text)
@@ -53,14 +40,14 @@ def printLine(text)
     print text
 end
 trap("INT") { 
-	puts "#{cTrivial("User stop analyzing!")}"
+	puts "#{Cc.cTrivial("User stop analyzing!")}"
     Process.exit
 }
   printLine("Capturing..")
 $cShrink=0
 def packetShrink(mNotify,setShrink=500) #convert 'cShrink' the same packet to 1
    	if $cShrink>setShrink
-   	  putLine(sysTimeWrap(cTrivial(mNotify)))
+   	  putLine(sysTimeWrap(Cc.cTrivial(mNotify)))
       $cShrink=0
     else
       $cShrink+=1
@@ -70,9 +57,9 @@ end
     answer = $f.gets
 	case answer
     when /NOTIFY sip.* \(text\/plain\)/
-       putLine(sysTimeWrap("CUCM send #{cEvent("Reset or Restart")}"))
+       putLine(sysTimeWrap("CUCM send #{Cc.cEvent("Reset or Restart")}"))
     when /CDP Device ID: (\S+)/
-       putLine(sysTimeWrap(lastArrWrap("#{cTrivial("CDP: device ID is #{$1}")}","cdp")))
+       putLine(sysTimeWrap(lastArrWrap("#{Cc.cTrivial("CDP: device ID is #{$1}")}","cdp")))
    # when /ARP Who has (\S+)?/
    #    putLine("#{sysTime}\t #{cTrivial("ARP: who? #{$1}")}")
    # when /ARP (\S+) is at (\S+)/
@@ -88,30 +75,32 @@ end
     #when /(\S+) -> \S+ SIP Status: 200 OK/
     #   putLine(sysTimeWrap(lastArrWrap("SIP: registered (#{$1})","sip")))
     when /DHCP Request/
-       putLine(sysTimeWrap(lastArrWrap(cTrivial("DHCP Request"),"dhcp")))
+       putLine(sysTimeWrap(lastArrWrap(Cc.cTrivial("DHCP Request"),"dhcp")))
     when /DHCP ACK/
        printLine(cTrivial("..obtained ACK"))
     when /Gratuitous ARP for (.*) /
        #puts "#{sysTime}\t #{cEvent("GARP")} for #{$1}"
-       putLine(sysTimeWrap(lastArrWrap(cTrivial("GARP for #{$1}"),"garp")))
+       putLine(sysTimeWrap(lastArrWrap(Cc.cTrivial("GARP for #{$1}"),"garp")))
     when /-> (\S+) DNS Standard query A (\S+)/
-       putLine(sysTimeWrap(lastArrWrap("#{cEvent("DNS")}  query for #{$2} from "+$1,"dns")))
+       putLine(sysTimeWrap(lastArrWrap("#{Cc.cEvent("DNS")}  query for #{$2} from "+$1,"dns")))
     when /DNS Standard query response A (\S+)/
        printLine(cEvent(".. response "+$1))
+    when /DNS Standard query response, No such name/
+       printLine(cEvent(".. response No such name"))
     when /-> (\S+) TFTP Read Request, File: (\S+)\\/
-       putLine(sysTimeWrap("#{cEvent("TFTP")} request #{cFileName("#{$2}")} from "+$1))
+       putLine(sysTimeWrap("#{Cc.cEvent("TFTP")} request #{Cc.cFileName("#{$2}")} from "+$1))
     when /PT=ITU-T G.711/
 		packetShrink("G.711 RTP...seding")
     when /PT=ITU-T G.729/
 		packetShrink("G.729 RTP...sending")
     when /TFTP Data Packet.*\(last\)/
-       printLine(cEvent(".. obtained"))
+       printLine(Cc.cEvent(".. obtained"))
     when /TFTP Error Code.*Could not open/
-       printLine(cRed(".. failed!"))
+       printLine(Cc.cRed(".. failed!"))
     when /HTTP GET \/(\S+)/
-	   putLine(sysTimeWrap("HTTP #{cTrivial("sent #{$1}")}"))
+	   putLine(sysTimeWrap("HTTP #{Cc.cTrivial("sent #{$1}")}"))
     when /SIP Status: 401 Unauthorized/
-	   putLine(sysTimeWrap(lastArrWrap("SIP #{cTrivial("Unauthorized")}","Unauth")))
+	   putLine(sysTimeWrap(lastArrWrap("SIP #{Cc.cTrivial("Unauthorized")}","Unauth")))
     when /(\S+) -> \S+ RTP PT=Comfort noise/
 	   packetShrink("Comfort noise (#{$1})",20)
     when /T.38 UDP:UDPTLPacket/
