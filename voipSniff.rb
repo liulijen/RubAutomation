@@ -1,10 +1,20 @@
+=begin
+Program:voipSniff.rb
+Author: Lee 2010.05.06 
+=end
+tsharkCmdFile='sharkOrthrus.sh'
+
+
+
+#External File
 require 'ConsUtil.rb'
 include Cc
+
 if ARGV[0].length!=17
 	puts "Usage: snifOrthrus [MAC Address]\n\n"
     Process.exit
 end
-$fCmd=open('sharkOrthrus.sh','r')
+$fCmd=open(tsharkCmdFile,'r')
 cmd=""
 while $fCmd.gets
 	cmd+=$_
