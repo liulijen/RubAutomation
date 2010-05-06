@@ -1,4 +1,3 @@
-$expect_verbose = true
 if ARGV[0].length!=17
 	puts "Usage: snifOrthrus [MAC Address]\n\n"
     Process.exit
@@ -10,10 +9,8 @@ while $fCmd.gets
 end
 $fCmd.close
 cmd=cmd.gsub('EC:44:76:1F:7E:62',ARGV[0])
-#$f=IO.popen 'tshark -i en0 -f "ether host EC:44:76:1F:7E:62 and not udp" -V'
 require 'pty'
 $f,$w,pid=PTY.spawn(cmd)
-#$f=IO.popen $cmd.gets 
 def cFileName(ori)
    return "\33[1;34;40m#{ori}\33[0m"
 end
