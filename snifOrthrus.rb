@@ -57,9 +57,6 @@ trap("INT") {
     Process.exit
 }
   printLine("Capturing..")
-  cRTP=0; #RTP show interval
-  tCDP=0; #CDP timer
-
 $cShrink=0
 def packetShrink(mNotify,setShrink=500) #convert 'cShrink' the same packet to 1
    	if $cShrink>setShrink
