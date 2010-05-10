@@ -1,6 +1,10 @@
 require 'nokogiri'
 require'net/http'
 $info={}
+def sysTimeWrap (content)
+   t=Time.new
+   return t.strftime("%Y-%m-%d %H:%M:%S ")+content.to_s
+end
 def getRegister(ip)
 	timeout(3) do
 		url="http://#{ip}/Network_Setup.htm"
@@ -36,7 +40,7 @@ end
 loop{
 	collectResult
 	system('clear')
-	puts "-------Orthrus Register Status Real Time Monitor-------\n"
+	puts "-------"+sysTimeWrap("Orthrus Register Status Real Time Monitor")+"-------\n"
 	puts prResult	
 	sleep(10)
 }
