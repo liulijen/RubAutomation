@@ -76,6 +76,8 @@ end
    #    printLine(cTrivial(".. is ")+$2)
     when /Request: INVITE sip:(\S+):/
        putLine(sysTimeWrap("INVITE #{$1}"))
+    when /SIP Request: REGISTER sip:(\S+);.* sip.Reason/
+       putLine(sysTimeWrap(Cc.cEvent("SIP")+" registered with  #{$1}"))
     #when /(\S+) SIP Request: REGISTER.*sip.Expires == (\S+)/
     #   putLine(sysTimeWrap(lastArrWrap("#{cTrivial("SIP REGISTER #{$1}")}","sip")))
     #when /SIP Status: (\d+) (\S+)/
@@ -107,8 +109,8 @@ end
        printLine(Cc.cEvent(".. obtained"))
     when /TFTP Error Code.*Could not open/
        printLine(Cc.cRed(".. failed!"))
-    when /HTTP GET \/(\S+)/
-	   putLine(sysTimeWrap("HTTP #{Cc.cTrivial("sent #{$1}")}"))
+    #when /HTTP GET \/(\S+)/
+	#   putLine(sysTimeWrap("HTTP #{Cc.cTrivial("sent #{$1}")}"))
     when /SIP Status: 401 Unauthorized/
 	   putLine(sysTimeWrap(lastArrWrap("SIP #{Cc.cTrivial("Unauthorized")}","Unauth")))
     when /(\S+) -> \S+ RTP PT=Comfort noise/
