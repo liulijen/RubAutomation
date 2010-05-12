@@ -26,6 +26,8 @@ def getRegister(ip)
 		$info[ip]="timeout"
 	rescue Errno::EHOSTUNREACH => x
 		$info[ip]="Host Unreachable"
+	rescue Errno::ECONNREFUSED
+		$info[ip]="Connection Refused"
 end
 def collectResult
 		ARGV.each{|arg|
