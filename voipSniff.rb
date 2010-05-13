@@ -25,7 +25,7 @@ require 'pty'
 $f,$w,pid=PTY.spawn(cmd)
 def sysTimeWrap (content)
    t=Time.new
-   return Cc.cTrivial(t.strftime("(#{ARGV[0][-5..-1]})%H:%M:%S"))+"\t"+content.to_s
+   return Cc.cTrivial(t.strftime("#{ARGV[0][-5..-1]})%H:%M:%S"))+"\t"+content.to_s
 end
 #Time Period Meter
 $last={}
@@ -74,14 +74,14 @@ end
    #    putLine("#{sysTime}\t #{cTrivial("ARP: who? #{$1}")}")
    # when /ARP (\S+) is at (\S+)/
    #    printLine(cTrivial(".. is ")+$2)
-    when /SIP Request: REGISTER sip:(\S+)[\s.|;\S+](?!sip.Reason) sip.Expires/
-       putLine(sysTimeWrap(lastArrWrap(Cc.cTrivial("SIP  keepAlive #{$1.split(';')[0]}"),"sip"+$1)))
+   # when /SIP Request: REGISTER sip:(\S+)[\s.|;\S+](?!sip.Reason) sip.Expires/
+   #    putLine(sysTimeWrap(lastArrWrap(Cc.cTrivial("SIP  keepAlive #{$1.split(';')[0]}"),"sip"+$1)))
     when /Request: INVITE sip:(\S+):/
        putLine(sysTimeWrap("INVITE #{$1}"))
     when /SIP Request: REGISTER sip:(\S+)[;|\s].* sip.Reason/
        putLine(sysTimeWrap(Cc.cEvent("SIP")+Cc.cTrivial("  register ")+$1.split(';')[0]))
-    when /SIP Request: REFER sip:(\S+) /
-       printLine(Cc.cEvent(" ..REFER ")+$1)
+    #when /SIP Request: REFER sip:(\S+) /
+    #   printLine(Cc.cEvent(" ..REFER ")+$1)
     when /Request: BYE sip/
        putLine(sysTimeWrap("BYE a call"))
     when /DHCP Request/
@@ -100,6 +100,8 @@ end
        putLine(sysTimeWrap("#{Cc.cEvent("TFTP")} request #{Cc.cFileName("#{$2}")} from "+$1))
     when /PT=ITU-T G.711/
 		packetShrink("G.711 RTP...seding")
+    when /(\S+) -> (\S+) RTP EVENT Payload type=RTP Event, (.*) \(end\)/
+		putLine("\t\t"+Cc.cTrivial("#{$3} (#{$1})"))
     when /PT=ITU-T G.729/
 		packetShrink("G.729 RTP...sending")
     when /TFTP Data Packet.*\(last\)/
