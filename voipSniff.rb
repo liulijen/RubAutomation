@@ -25,7 +25,7 @@ require 'pty'
 $f,$w,pid=PTY.spawn(cmd)
 def sysTimeWrap (content)
    t=Time.new
-   return Cc.cTrivial(t.strftime("#{ARGV[0][-5..-1]})%H:%M:%S"))+"\t"+content.to_s
+   return Cc.cTrivial(t.strftime("(#{ARGV[0][-5..-1]})%H:%M:%S"))+"\t"+content.to_s
 end
 #Time Period Meter
 $last={}
@@ -54,13 +54,17 @@ trap("INT") {
     Process.exit
 }
   printLine("Capturing..")
-$cShrink=0
-def packetShrink(mNotify,setShrink=500) #convert 'cShrink' the same packet to 1
-   	if $cShrink>setShrink
+
+$shrHash={} #counter hash
+def packetShrink(mNotify,setShrink=500,key="NONE") #convert 'cShrink' the same packet to 1
+	if !$shrHash.has_key?(key)
+        $shrHash[key]=0
+    end
+   	if $shrHash[key] > setShrink
    	  putLine(sysTimeWrap(Cc.cTrivial(mNotify)))
-      $cShrink=0
+      $shrHash[key]=0
     else
-      $cShrink+=1
+      $shrHash[key]+=1
     end
 end
   loop{
@@ -99,11 +103,13 @@ end
     when /-> (\S+) TFTP Read Request, File: (\S+)\\/
        putLine(sysTimeWrap("#{Cc.cEvent("TFTP")} request #{Cc.cFileName("#{$2}")} from "+$1))
     when /PT=ITU-T G.711/
-		packetShrink("G.711 RTP...seding")
+		packetShrink("G.711 RTP...seding",500,"g711")
     when /(\S+) -> (\S+) RTP EVENT Payload type=RTP Event, (.*) \(end\)/
 		putLine("\t\t"+Cc.cTrivial("#{$3} (#{$1})"))
     when /PT=ITU-T G.729/
-		packetShrink("G.729 RTP...sending")
+		packetShrink("G.729 RTP...sending",500,"g729")
+    when /UDP Source port/
+		packetShrink("UDP...sending",500,"udp")
     when /TFTP Data Packet.*\(last\)/
        printLine(Cc.cEvent(".. obtained"))
     when /TFTP Error Code.*Could not open/
@@ -113,11 +119,11 @@ end
     when /SIP Status: 401 Unauthorized/
 	   putLine(sysTimeWrap(lastArrWrap("SIP #{Cc.cTrivial("Unauthorized")}","Unauth")))
     when /(\S+) -> \S+ RTP PT=Comfort noise/
-	   packetShrink("Comfort noise (#{$1})",20)
+	   packetShrink("Comfort noise (#{$1})",20,"VND")
     when /T.38 UDP:UDPTLPacket/
-		packetShrink("T.38 fax...sending")
+		packetShrink("T.38 fax...sending",500,"t38")
     when /TLSv1/
-		packetShrink("TLS..",20)
+		packetShrink("TLS..",20,"tls")
     end
 
   }
