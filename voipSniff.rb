@@ -69,32 +69,29 @@ end
     when /NOTIFY sip.* \(text\/plain\)/
        putLine(sysTimeWrap("CUCM send #{Cc.cEvent("Reset or Restart")}"))
     when /CDP Device ID: (\S+)/
-       putLine(sysTimeWrap(lastArrWrap("#{Cc.cTrivial("CDP: device ID is #{$1}")}","cdp")))
+       putLine(sysTimeWrap(lastArrWrap("#{Cc.cTrivial("CDP  device ID is #{$1}")}","cdp")))
    # when /ARP Who has (\S+)?/
    #    putLine("#{sysTime}\t #{cTrivial("ARP: who? #{$1}")}")
    # when /ARP (\S+) is at (\S+)/
    #    printLine(cTrivial(".. is ")+$2)
+    when /SIP Request: REGISTER sip:(\S+)[\s.|;\S+](?!sip.Reason) sip.Expires/
+       putLine(sysTimeWrap(lastArrWrap(Cc.cTrivial("SIP  keepAlive #{$1.split(';')[0]}"),"sip"+$1)))
     when /Request: INVITE sip:(\S+):/
        putLine(sysTimeWrap("INVITE #{$1}"))
-    when /SIP Request: REGISTER sip:(\S+);.* sip.Reason/
-       putLine(sysTimeWrap(Cc.cEvent("SIP")+" registered with  #{$1}"))
-    #when /(\S+) SIP Request: REGISTER.*sip.Expires == (\S+)/
-    #   putLine(sysTimeWrap(lastArrWrap("#{cTrivial("SIP REGISTER #{$1}")}","sip")))
-    #when /SIP Status: (\d+) (\S+)/
-    #   printLine(cTrivial(".."+$1+" "+$2))
+    when /SIP Request: REGISTER sip:(\S+)[;|\s].* sip.Reason/
+       putLine(sysTimeWrap(Cc.cEvent("SIP")+Cc.cTrivial("  register ")+$1.split(';')[0]))
+    when /SIP Request: REFER sip:(\S+) /
+       printLine(Cc.cEvent(" ..REFER ")+$1)
     when /Request: BYE sip/
        putLine(sysTimeWrap("BYE a call"))
-    #when /(\S+) -> \S+ SIP Status: 200 OK/
-    #   putLine(sysTimeWrap(lastArrWrap("SIP: registered (#{$1})","sip")))
     when /DHCP Request/
        putLine(sysTimeWrap(lastArrWrap(Cc.cTrivial("DHCP Request"),"dhcp")))
     when /DHCP ACK/
        printLine(cTrivial("..obtained ACK"))
     when /Gratuitous ARP for (.*) /
-       #puts "#{sysTime}\t #{cEvent("GARP")} for #{$1}"
        putLine(sysTimeWrap(lastArrWrap(Cc.cTrivial("GARP for #{$1}"),"garp")))
     when /-> (\S+) DNS Standard query A (\S+)/
-       putLine(sysTimeWrap(lastArrWrap("#{Cc.cEvent("DNS")}  query for #{$2} from "+$1,"dns")))
+       putLine(sysTimeWrap(lastArrWrap("#{Cc.cEvent("DNS")}  query for #{$2} from "+$1,"dns"+$1)))
     when /DNS Standard query response A (\S+)/
        printLine(cEvent(".. response "+$1))
     when /DNS Standard query response, No such name/
