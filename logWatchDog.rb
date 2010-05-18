@@ -71,6 +71,8 @@ require 'expect'
        puts "#{sysTime} #{$1} auth failed"
     when /Press ESC for monitor/
        puts "#{sysTime} Hardware Reset"
+    when /getTimerIndex failed/
+       puts "#{sysTime}\t\t\t#{cCriticalEvent("getTimerIndex failed!!!!!!!!!")}"
     when /Assert/
        puts "#{sysTime}\t\t\t#{cCriticalEvent("Assertion Happened!!!!!!!!!!")}"
     when /ready to close/
