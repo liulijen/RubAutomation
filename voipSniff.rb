@@ -124,6 +124,8 @@ end
 		packetShrink("T.38 fax...sending",500,"t38")
     when /TLSv1/
 		packetShrink("TLS..",20,"tls")
+    when /(\S+) -> (\S+) DHCP DHCP Release/
+        putLine(sysTimeWrap(Cc.cEvent("DHCP")+Cc.cTrivial(" release(")+$1+Cc.cTrivial(")")))
     end
 
   }
