@@ -10,8 +10,17 @@ tsharkCmdFile='sharkOrthrus.sh'
 require 'ConsUtil.rb'
 include Cc
 
-if ARGV[0].length!=17
-	puts "Usage: snifOrthrus [MAC Address]\n\n"
+if ARGV[0]==nil 
+	puts "Usage: ruby voipSniff.rb [MAC Address|IP Address] \n\n"
+    Process.exit
+end
+if ARGV[0].split('.').length ==4
+		oMac=`sh findMac.sh #{ARGV[0]}`
+		$targetMac=oMac.split(' ')[3]
+elsif ARGV[0].split(':').length ==6
+		$targetMac=ARGV[0]
+else
+	puts "Usage: ruby voipSniff.rb [MAC Address|IP Address] \n\n"
     Process.exit
 end
 $fCmd=open(tsharkCmdFile,'r')
@@ -20,12 +29,13 @@ while $fCmd.gets
 	cmd+=$_
 end
 $fCmd.close
-cmd=cmd.gsub('EC:44:76:1F:7E:62',ARGV[0])
+#cmd=cmd.gsub('EC:44:76:1F:7E:62',ARGV[0])
+cmd=cmd.gsub('EC:44:76:1F:7E:62',$targetMac)
 require 'pty'
 $f,$w,pid=PTY.spawn(cmd)
 def sysTimeWrap (content)
    t=Time.new
-   return Cc.cTrivial(t.strftime("(#{ARGV[0][-5..-1]})%H:%M:%S"))+"\t"+content.to_s
+   return Cc.cTrivial(t.strftime("(#{$targetMac[-5..-1].upcase})%H:%M:%S"))+"\t"+content.to_s
 end
 #Time Period Meter
 $last={}
