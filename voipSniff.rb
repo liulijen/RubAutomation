@@ -107,13 +107,13 @@ end
     when /-> (\S+) DNS Standard query A (\S+)/
        putLine(sysTimeWrap(lastArrWrap("#{Cc.cEvent("DNS")}  query for #{$2} from "+$1,"dns"+$1)))
     when /DNS Standard query response A (\S+)/
-       printLine(cEvent(".. response "+$1))
+       printLine(cMag(".. response "+$1))
     when /DNS Standard query response, No such name/
        printLine(cEvent(".. response No such name"))
     when /-> (\S+) TFTP Read Request, File: (\S+)\\/
        putLine(sysTimeWrap("#{Cc.cEvent("TFTP")} request #{Cc.cFileName("#{$2}")} from "+$1))
     when /PT=ITU-T G.711/
-		packetShrink("G.711 RTP...seding",500,"g711")
+		packetShrink("G.711 RTP...sending",500,"g711")
     when /(\S+) -> (\S+) RTP EVENT Payload type=RTP Event, (.*) \(end\)/
 		putLine("\t\t"+Cc.cTrivial("#{$3} (#{$1})"))
     when /PT=ITU-T G.729/
@@ -121,7 +121,7 @@ end
     when /UDP Source port/
 		packetShrink("UDP...sending",500,"udp")
     when /TFTP Data Packet.*\(last\)/
-       printLine(Cc.cEvent(".. obtained"))
+       printLine(Cc.cMag(".. obtained"))
     when /TFTP Error Code.*Could not open/
        printLine(Cc.cRed(".. failed!"))
     #when /HTTP GET \/(\S+)/

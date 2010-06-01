@@ -14,5 +14,8 @@ module Cc
 		def cRed(ori)
 		   return "\33[1;31;40m#{ori}\33[0m"
 		end
+		def cMag(ori)
+		   return "\33[1;35;40m#{ori}\33[0m"
+		end
 end
 
